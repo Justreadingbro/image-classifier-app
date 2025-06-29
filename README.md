@@ -5,7 +5,8 @@ A simple yet powerful web-based image classification app built with **TensorFlow
 ![image](https://github.com/user-attachments/assets/d6de7b75-e815-451b-b68d-2ac93ab4d7ba)
 
 ---
-
+# It is now live at Huggingface Spaces
+[Live Demo](https://huggingface.co/spaces/justreadingbro/image-classifier-app)
 ## 🚀 Features
 
 - 🔍 Supports multiple models: **MobileNetV2**, **EfficientNetB0**, **ResNet50** and **InceptionV3**
