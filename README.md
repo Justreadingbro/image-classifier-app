@@ -39,3 +39,7 @@ pip install -r requirements.txt
 ```bash
 python app.py
 ```
+## Gradio will automatically open the server at
+```bash
+http://127.0.0.1:7860/
+```
