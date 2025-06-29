@@ -10,7 +10,6 @@ from typing import List, Tuple, Dict, Optional
 import requests
 from io import BytesIO
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -76,7 +75,6 @@ class AdvancedImageClassifier:
             enhancer = ImageEnhance.Brightness(image)
             return enhancer.enhance(1.2)
         elif enhancement_type == "Auto Enhance":
-            # Apply multiple enhancements
             enhanced = image.filter(ImageFilter.SHARPEN)
             enhancer = ImageEnhance.Contrast(enhanced)
             enhanced = enhancer.enhance(1.3)
@@ -87,14 +85,11 @@ class AdvancedImageClassifier:
     def preprocess_image(self, image: Image.Image, model_name: str, enhancement: str) -> np.ndarray:
         """Preprocess image for model input with enhancements."""
         try:
-            # Apply enhancement
             image = self.enhance_image(image, enhancement)
-            
-            # Resize to model's input size
+
             input_size = self.input_sizes[model_name]
             image = image.resize(input_size, Image.Resampling.LANCZOS)
-            
-            # Convert to array and preprocess
+
             image_array = tf.keras.preprocessing.image.img_to_array(image)
             image_array = np.expand_dims(image_array, axis=0)
             image_array = self.preprocess_map[model_name](image_array)
@@ -110,30 +105,24 @@ class AdvancedImageClassifier:
         try:
             start_time = time.time()
             
-            # Preprocess image
             image_array = self.preprocess_image(image, model_name, enhancement)
             
-            # Make prediction
             predictions = self.models[model_name].predict(image_array, verbose=0)
             inference_time = time.time() - start_time
             
-            # Decode predictions
             decoded = self.decode_map[model_name](predictions, top=top_k)[0]
-            
-            # Format results
+
             results = {}
             confidence_scores = []
             for i, (class_id, label, score) in enumerate(decoded):
                 clean_label = label.replace("_", " ").title()
                 results[clean_label] = float(score)
                 confidence_scores.append(score)
-            
-            # Generate Wikipedia link for top prediction
+
             top_label = decoded[0][1].replace("_", " ")
             wiki_link = f"https://en.wikipedia.org/wiki/{urllib.parse.quote(top_label)}"
             wiki_html = f'<a href="{wiki_link}" target="_blank" style="color: #1976d2; text-decoration: none;">📖 {top_label.title()} on Wikipedia</a>'
-            
-            # Additional metadata
+
             metadata = {
                 "inference_time": f"{inference_time:.3f}s",
                 "model_used": model_name,
@@ -159,10 +148,8 @@ class AdvancedImageClassifier:
             
             for i, img in enumerate(images):
                 try:
-                    # Classify single image
                     pred_dict, wiki_link, _ = self.classify_single(img, model_name, enhancement, top_k)
                     
-                    # Format for table display
                     if "Error" not in pred_dict:
                         pred_str = " | ".join([f"{label}: {score:.1%}" for label, score in pred_dict.items()])
                         top_confidence = list(pred_dict.values())[0]
@@ -183,14 +170,12 @@ class AdvancedImageClassifier:
                     results.append([f"Image {i+1}", f"Error: {str(e)}", "N/A"])
                     wiki_links.append("")
             
-            # Create combined HTML for wiki links
             valid_links = [link for link in wiki_links if link]
             if valid_links:
                 combined_links_html = "<div style='max-height: 200px; overflow-y: auto;'>" + "<br>".join(valid_links) + "</div>"
             else:
                 combined_links_html = "<p>No Wikipedia links available</p>"
             
-            # Batch metadata
             total_time = time.time() - start_time
             avg_confidence = np.mean(all_confidences) if all_confidences else 0
             metadata = {
@@ -218,10 +203,8 @@ class AdvancedImageClassifier:
         }
         return model_info.get(model_name, "Model information not available.")
 
-# Initialize classifier
 classifier = AdvancedImageClassifier()
 
-# Custom CSS for better styling
 css = """
 .gradio-container {
     max-width: 1200px !important;
@@ -241,7 +224,6 @@ css = """
 }
 """
 
-# Create Gradio interface
 with gr.Blocks(css=css, title="Advanced AI Image Classifier") as demo:
     gr.HTML("""
     <div style='text-align: center; padding: 20px;'>
@@ -285,8 +267,7 @@ with gr.Blocks(css=css, title="Advanced AI Image Classifier") as demo:
                 value="Single Image", 
                 label="📂 Classification Mode"
             )
-            
-            # Input components
+
             image_input = gr.Image(
                 type="pil", 
                 label="📷 Upload Image",
@@ -306,7 +287,6 @@ with gr.Blocks(css=css, title="Advanced AI Image Classifier") as demo:
         size="lg"
     )
 
-    # Output components
     with gr.Row():
         with gr.Column():
             output_label = gr.Label(
@@ -334,19 +314,18 @@ with gr.Blocks(css=css, title="Advanced AI Image Classifier") as demo:
                 visible=True
             )
 
-    # Event handlers
     def update_model_info(model_name):
         return classifier.get_model_info(model_name)
 
     def toggle_inputs(selected_mode):
         is_single = selected_mode == "Single Image"
         return (
-            gr.update(visible=is_single),      # image_input
-            gr.update(visible=not is_single),  # batch_input
-            gr.update(visible=is_single),      # output_label
-            gr.update(visible=is_single),      # output_html
-            gr.update(visible=not is_single),  # batch_output
-            gr.update(visible=not is_single),  # batch_links_html
+            gr.update(visible=is_single),
+            gr.update(visible=not is_single),
+            gr.update(visible=is_single),
+            gr.update(visible=is_single),
+            gr.update(visible=not is_single),
+            gr.update(visible=not is_single),
         )
 
     def predict(image, files, model_name, selected_mode, enhancement, top_k):
@@ -381,7 +360,6 @@ with gr.Blocks(css=css, title="Advanced AI Image Classifier") as demo:
             logger.error(error_msg)
             return None, error_msg, None, None, {"error": error_msg}
 
-    # Connect event handlers
     model_dropdown.change(
         fn=update_model_info,
         inputs=[model_dropdown],
@@ -400,7 +378,6 @@ with gr.Blocks(css=css, title="Advanced AI Image Classifier") as demo:
         outputs=[output_label, output_html, batch_output, batch_links_html, metadata_output]
     )
 
-    # Examples section
     gr.Examples(
         examples=[
             ["Single Image", "EfficientNetB0", "Auto Enhance", 5],
