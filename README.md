@@ -29,8 +29,8 @@ image-classifier-app/</br>
 
 **Clone the repository**
 ```bash
-   git clone https://github.com/Justreadingbro/image-classifier-app.git
-   cd image-classifier-app
+git clone https://github.com/Justreadingbro/image-classifier-app.git
+cd image-classifier-app
 ```
 ## Installing requirements
 ```bash
