@@ -27,11 +27,11 @@ image-classifier-app/</br>
 
 ## 🧪 How to Run
 
-1. **Clone the repository**
-   ```bash
+**Clone the repository**
+```bash
    git clone https://github.com/Justreadingbro/image-classifier-app.git
    cd image-classifier-app
-   ```
+```
 ## Installing requirements
 ```bash
 pip install -r requirements.txt
